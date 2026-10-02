@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Arcanum Calculator</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='10' fill='%23000'/><path d='M32 8 L37 27 L56 32 L37 37 L32 56 L27 37 L8 32 L27 27 Z' fill='%238b0000'/></svg>">
+<meta name="theme-color" content="#000000">
+<meta name="description" content="Arcanum Calculator — arcana calculation by Julian date of birth. All rights reserved © Arcanum Calc">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&family=UnifrakturMaguntia&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #000;
+    color: #b8b8b8;
+    font-family: 'UnifrakturMaguntia', 'UnifrakturCook', 'Blackletter', serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+  }
+
+  h1 {
+    font-family: 'UnifrakturCook', serif;
+    font-size: 42px;
+    color: #8b0000;
+    text-shadow: 0 0 12px #4a0000, 0 0 24px #2a0000;
+    margin-bottom: 8px;
+    text-align: center;
+  }
+
+  .subtitle {
+    font-size: 16px;
+    color: #555;
+    margin-bottom: 32px;
+  }
+
+  .input-block {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .input-block input {
+    background: #0a0a0a;
+    border: 1px solid #2a0000;
+    color: #b8b8b8;
+    font-family: 'UnifrakturMaguntia', serif;
+    font-size: 22px;
+    padding: 10px 14px;
+    width: 110px;
+    text-align: center;
+    outline: none;
+    transition: border 0.3s, box-shadow 0.3s;
+    letter-spacing: 2px;
+  }
+
+  .input-block input:focus {
+    border-color: #8b0000;
+    box-shadow: 0 0 12px #4a0000;
+  }
+
+  .input-block input::placeholder {
+    color: #333;
+    letter-spacing: 3px;
+  }
+
+  button {
+    background: #0a0a0a;
+    border: 1px solid #8b0000;
+    color: #8b0000;
+    font-family: 'UnifrakturCook', serif;
+    font-size: 20px;
+    padding: 12px 32px;
+    cursor: pointer;
+    letter-spacing: 2px;
+    transition: all 0.3s;
+    text-shadow: 0 0 6px #4a0000;
+  }
+
+  button:hover {
+    background: #1a0000;
+    box-shadow: 0 0 18px #4a0000;
+    color: #c00000;
+  }
+
+  .results {
+    margin-top: 36px;
+    width: 100%;
+    max-width: 760px;
+    display: none;
+  }
+
+  .julian-block {
+    text-align: center;
+    margin-bottom: 28px;
+    padding: 16px;
+    border: 1px solid #2a0000;
+    background: #050505;
+  }
+
+  .julian-label {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 6px;
+  }
+
+  .julian-date {
+    font-size: 30px;
+    color: #8b0000;
+    font-family: 'UnifrakturCook', serif;
+    text-shadow: 0 0 10px #4a0000;
+    letter-spacing: 3px;
+  }
+
+  .row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 18px;
+    border-bottom: 1px solid #1a0000;
+    background: #050505;
+    transition: background 0.2s;
+  }
+
+  .row:hover {
+    background: #0d0000;
+  }
+
+  .row .code {
+    color: #555;
+    font-size: 18px;
+    min-width: 50px;
+    font-family: 'UnifrakturCook', serif;
+  }
+
+  .row .label {
+    color: #999;
+    font-size: 16px;
+    flex: 1;
+    margin-left: 12px;
+  }
+
+  .row .value {
+    color: #8b0000;
+    font-size: 24px;
+    font-family: 'UnifrakturCook', serif;
+    text-shadow: 0 0 8px #4a0000;
+    min-width: 60px;
+    text-align: right;
+  }
+
+  .row .arcana {
+    color: #666;
+    font-size: 15px;
+    min-width: 150px;
+    text-align: right;
+    font-style: italic;
+  }
+
+  .error {
+    color: #8b0000;
+    font-size: 18px;
+    margin-top: 16px;
+    text-align: center;
+    text-shadow: 0 0 8px #4a0000;
+  }
+  .legend {
+    margin-top: 44px;
+    width: 100%;
+    max-width: 760px;
+    border: 1px solid #2a0000;
+    background: #050505;
+    padding: 18px 22px;
+    font-family: Georgia, 'Times New Roman', serif;
+  }
+  .legend-title {
+    font-family: 'UnifrakturCook', serif;
+    color: #8b0000;
+    font-size: 22px;
+    text-align: center;
+    margin-bottom: 12px;
+    text-shadow: 0 0 8px #4a0000;
+  }
+  .legend-row {
+    display: flex;
+    gap: 14px;
+    padding: 8px 0;
+    border-bottom: 1px solid #1a0000;
+    font-size: 15px;
+  }
+  .legend-row:last-child { border-bottom: none; }
+  .legend-row .k { color: #8b0000; min-width: 80px; font-weight: bold; }
+  .legend-row .t { color: #999; }
+  footer {
+    margin-top: 32px;
+    color: #444;
+    font-size: 13px;
+    font-family: Georgia, 'Times New Roman', serif;
+    letter-spacing: 1px;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<h1>Arcanum Calculator</h1>
+<div class="subtitle">✦ julian system ✦</div>
+
+<div class="input-block">
+  <input type="text" id="day" placeholder="00" maxlength="2">
+  <input type="text" id="month" placeholder="00" maxlength="2">
+  <input type="text" id="year" placeholder="0000" maxlength="4">
+</div>
+
+<div style="text-align:center;">
+  <button onclick="calculate()">CALCULATE</button>
+</div>
+
+<div class="error" id="error"></div>
+
+<div class="results" id="results">
+  <div class="julian-block">
+    <div class="julian-label">Julian Date</div>
+    <div class="julian-date" id="julianDate">—</div>
+  </div>
+  <div id="rows"></div>
+</div>
+
+<div class="legend">
+  <div class="legend-title">Description</div>
+  <div class="legend-row"><span class="k">P0</span><span class="t">true face hidden from everyone</span></div>
+  <div class="legend-row"><span class="k">P1</span><span class="t">Julian value</span></div>
+  <div class="legend-row"><span class="k">P2, P3</span><span class="t">partner and their environment</span></div>
+  <div class="legend-row"><span class="k">P4, P8</span><span class="t">profession and money</span></div>
+  <div class="legend-row"><span class="k">P5</span><span class="t">social channel of money</span></div>
+  <div class="legend-row"><span class="k">P6, P7</span><span class="t">karmic illnesses</span></div>
+</div>
+
+<footer>All rights reserved &copy; Arcanum Calc</footer>
+
+<script>
+const ARCANA = {
+  1: "Magician", 2: "High Priestess", 3: "Empress", 4: "Emperor",
+  5: "Hierophant", 6: "Lovers", 7: "Chariot", 8: "Strength",
+  9: "Hermit", 10: "Wheel of Fortune", 11: "Justice", 12: "Hanged Man",
+  13: "Death", 14: "Temperance", 15: "Devil", 16: "Tower",
+  17: "Star", 18: "Moon", 19: "Sun", 20: "Judgement", 21: "World", 22: "Fool"
+};
+
+// ---------- core helpers ----------
+
+function sumDigits(n) {
+  n = Math.abs(n);
+  let s = 0;
+  while (n > 0) { s += n % 10; n = Math.floor(n / 10); }
+  return s;
+}
+
+function reduce22(n) {
+  n = ((n % 22) + 22) % 22;
+  return n === 0 ? 22 : n;
+}
+
+function reduceDigits(n) {
+  n = Math.abs(n);
+  while (n > 22) n = sumDigits(n);
+  return n === 0 ? 22 : n;
+}
+
+// ---------- julian date ----------
+
+function toJulian(day, month, year) {
+  const a = Math.floor((14 - month) / 12);
+  const y = year + 4800 - a;
+  const m = month + 12 * a - 3;
+  const jdn = day + Math.floor((153 * m + 2) / 5) + 365 * y
+            + Math.floor(y / 4) - Math.floor(y / 100) + Math.floor(y / 400) - 32045;
+  const c = jdn + 32082;
+  const d = Math.floor((4 * c + 3) / 1461);
+  const e = c - Math.floor(1461 * d / 4);
+  const mm = Math.floor((5 * e + 2) / 153);
+  return {
+    d: e - Math.floor((153 * mm + 2) / 5) + 1,
+    m: mm + 3 - 12 * Math.floor(mm / 10),
+    y: d - 4800 + Math.floor(mm / 10)
+  };
+}
+
+// ---------- methods ----------
+
+const METHODS = [
+  { code: "P0", label: "P0 — who you really are (all at once)",  fn: (d,m,g,c,s) => reduce22(d) },
+  { code: "P1", label: "P1 — essence of man",                    fn: (d,m,g,c,s) => reduce22(s) },
+  { code: "P2", label: "P2 — essence of partner",                fn: (d,m,g,c,s) => reduce22(22 - reduce22(s)) },
+  { code: "P3", label: "P3 — partner's environment",             fn: (d,m,g,c,s) => reduce22(m + g) },
+  { code: "P4", label: "P4 — type of place",                     fn: (d,m,g,c,s) => reduce22(g + d + m) },
+  { code: "P5", label: "P5 — money (through whom)",              fn: (d,m,g,c,s) => reduceDigits(d * m + g) },
+  { code: "P6", label: "P6 — fall",                              fn: (d,m,g,c,s) => reduce22(d + g + c) },
+  { code: "P7", label: "P7 — illness",                           fn: (d,m,g,c,s) => reduce22(22 - (d + m + 7)) },
+  { code: "P8", label: "P8 — max money (contracts)",             fn: (d,m,g,c,s) => reduce22(reduceDigits(d * m * g) + c) }
+];
+
+// ---------- calc ----------
+
+function calculate() {
+  const day = parseInt(document.getElementById('day').value);
+  const month = parseInt(document.getElementById('month').value);
+  const year = parseInt(document.getElementById('year').value);
+  const err = document.getElementById('error');
+  const res = document.getElementById('results');
+
+  err.textContent = "";
+  res.style.display = "none";
+
+  if (!day || !month || !year || day < 1 || day > 31 || month < 1 || month > 12 || year < 1 || year > 9999) {
+    err.textContent = "⚠ enter a valid date ⚠";
+    return;
+  }
+
+  const j = toJulian(day, month, year);
+  const D = j.d;
+  const M = j.m;
+  const G = reduce22(sumDigits(j.y));
+  const C = 13;
+  const S = sumDigits(D) + sumDigits(M) + sumDigits(j.y);
+
+  document.getElementById('julianDate').textContent =
+    String(D).padStart(2,'0') + ' . ' + String(M).padStart(2,'0') + ' . ' + j.y;
+
+  const rows = document.getElementById('rows');
+  rows.innerHTML = "";
+
+  METHODS.forEach(m => {
+    const val = m.fn(D, M, G, C, S);
+    const div = document.createElement('div');
+    div.className = 'row';
+    div.innerHTML = `
+      <span class="code">${m.code}</span>
+      <span class="label">${m.label}</span>
+      <span class="value">${val}</span>
+      <span class="arcana">${ARCANA[val] || ''}</span>
+    `;
+    rows.appendChild(div);
+  });
+
+  res.style.display = "block";
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Enter') calculate(); });
+</script>
+</body>
+</html>
